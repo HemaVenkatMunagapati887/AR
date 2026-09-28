@@ -1,0 +1,28 @@
+# Node
+node_modules/
+npm-debug.log*
+dist/
+.env
+
+# Backend runtime data (never commit real data / secrets)
+backend/.mongo-data/
+backend/*.log
+
+# Unity
+mobile-ar/Library/
+mobile-ar/Temp/
+mobile-ar/Obj/
+mobile-ar/Logs/
+mobile-ar/Build/
+mobile-ar/Builds/
+mobile-ar/UserSettings/
+mobile-ar/MemoryCaptures/
+mobile-ar/*.csproj
+mobile-ar/*.sln
+mobile-ar/*.userprefs
+mobile-ar/.vs/
+mobile-ar/*.apk
+
+# OS
+.DS_Store
+Thumbs.db
