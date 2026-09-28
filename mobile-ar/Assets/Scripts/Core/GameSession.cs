@@ -106,7 +106,7 @@ namespace ArSafety.Core
 
             bool done = false;
             JObject response = null;
-            yield return ApiClient.Instance.GetModuleFull(moduleId, CurrentWorker?.authToken, (success, json) =>
+            yield return ApiClient.Instance.GetModuleOfflineBundle(moduleId, CurrentWorker?.authToken, (success, json) =>
             {
                 response = success ? json : null;
                 done = true;

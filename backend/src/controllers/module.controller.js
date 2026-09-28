@@ -46,4 +46,19 @@ async function getModuleFull(req, res, next) {
   }
 }
 
-module.exports = { listModules, getModuleForTraining, getModuleFull };
+// Worker-accessible: full module INCLUDING the answer key, downloaded once and
+// cached on-device (LocalStorage.cs) so AssessmentEngine can grade an attempt
+// with zero connectivity. This is a deliberate offline-first tradeoff — the
+// answer key lives on the device — acceptable for an MVP where the backend
+// always re-scores on sync and is the actual source of truth for certification.
+async function getModuleOfflineBundle(req, res, next) {
+  try {
+    const moduleDoc = await Module.findOne({ moduleId: req.params.id, active: true });
+    if (!moduleDoc) return res.status(404).json({ error: 'Module not found' });
+    res.json({ module: moduleDoc });
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { listModules, getModuleForTraining, getModuleFull, getModuleOfflineBundle };

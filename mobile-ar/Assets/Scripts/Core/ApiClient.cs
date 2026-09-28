@@ -64,9 +64,18 @@ namespace ArSafety.Core
             HandleJsonResponse(req, onDone);
         }
 
-        public IEnumerator GetModuleFull(string moduleId, string token, Action<bool, JObject> onDone)
+        public IEnumerator GetModuleForTraining(string moduleId, string token, Action<bool, JObject> onDone)
         {
             using var req = BuildRequest("GET", "/modules/" + moduleId, null, token);
+            yield return req.SendWebRequest();
+            HandleJsonResponse(req, onDone);
+        }
+
+        // Includes the answer key — see module.controller.js's getModuleOfflineBundle
+        // for why this is intentionally worker-accessible, not admin-only.
+        public IEnumerator GetModuleOfflineBundle(string moduleId, string token, Action<bool, JObject> onDone)
+        {
+            using var req = BuildRequest("GET", "/modules/" + moduleId + "/offline-bundle", null, token);
             yield return req.SendWebRequest();
             HandleJsonResponse(req, onDone);
         }
