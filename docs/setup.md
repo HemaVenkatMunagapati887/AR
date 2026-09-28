@@ -33,26 +33,60 @@ npm run dev              # http://localhost:5173
 
 The public certificate verification page is `http://localhost:5173/verify/<certificateId>` — this is the URL a QR code encodes (`VERIFY_BASE_URL` in `backend/.env`).
 
-## 3. Mobile AR app (Unity)
+## 3. Mobile AR app (React Native)
 
-1. Install **Unity Hub** and **Unity 6000.0 LTS** with the **Android Build Support** module (including the Android SDK & NDK Tools sub-module) via Unity Hub.
-2. Open `mobile-ar/` as a Unity project.
-3. Unity will resolve packages from `Packages/manifest.json` (AR Foundation, ARCore XR Plugin, TextMeshPro, Newtonsoft Json).
-4. Run **AR Safety → Build Main Scene** from the Unity menu once (regenerates `Assets/Scenes/Main.unity` from `Assets/Editor/SceneBuilder.cs` — see that file's header comment for the equivalent batchmode command).
-5. In `Assets/Scripts/Core/ApiClient.cs`, set `baseUrl` for your target device:
-   - Android Emulator → host machine: `http://10.0.2.2:5000/api`
-   - Physical device on the same Wi-Fi as your dev machine: `http://<your-machine-LAN-IP>:5000/api`
-6. **File → Build Settings → Android → Switch Platform**, then **AR Safety → Build Android APK** (or use the menu item, which also applies the Android 10+ / API 29 player settings).
-7. Install the resulting APK (`mobile-ar/Builds/Android/ARSafetyTrainer.apk`) on an ARCore-supported Android 10+ device.
+Stack: React Native 0.86 (TypeScript, new architecture/Fabric enabled) + `@reactvision/react-viro` for AR Foundation-equivalent plane detection and object placement over ARCore.
+
+### One-time environment setup
+
+1. **Java** — any JDK the Android Gradle Plugin supports (17+; JDK 23 has been verified working with the bundled Gradle wrapper here).
+2. **Android SDK** — install via Android Studio, or command-line only:
+   ```bash
+   # Download commandline-tools from https://developer.android.com/studio#command-tools
+   # into %LOCALAPPDATA%\Android\Sdk\cmdline-tools\latest, then:
+   sdkmanager --licenses
+   sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;27.1.12297006" "cmake;3.22.1"
+   ```
+   `ndk` and `cmake` are required because `@reactvision/react-viro` ships native code.
+3. Create `mobile-app/android/local.properties`:
+   ```
+   sdk.dir=C:\\Users\\<you>\\AppData\\Local\\Android\\Sdk
+   ```
+
+### Install and run
+
+```bash
+cd mobile-app
+npm install
+```
+
+Set the backend URL the app should call, in `src/api/client.ts` (`DEFAULT_BASE_URL`) or at runtime via `setBaseUrl()`:
+- Android Emulator → host machine: `http://10.0.2.2:5000/api` (the default)
+- Physical device on the same Wi-Fi as your dev machine: `http://<your-machine-LAN-IP>:5000/api`
+
+Build and install a debug APK onto a connected device/emulator:
+
+```bash
+cd android
+./gradlew assembleDebug
+# APK output: android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+Or, with a device/emulator running and Metro available:
+
+```bash
+npm run android
+```
 
 ### Known manual step: Hindi/Santali glyph rendering
 
-TextMeshPro's default font does not include Devanagari glyphs. Before the Hindi UI is demo-ready:
-1. Import a Unicode font such as **Noto Sans Devanagari** (SIL Open Font License).
-2. Window → TextMeshPro → Font Asset Creator → generate a TMP Font Asset from it.
-3. Add it as a fallback under **Project Settings → TextMeshPro → Settings → Fallback Font Assets** so every existing `TMP_Text` picks it up automatically.
+React Native's default system font on most Android devices already includes Devanagari glyphs (Noto Sans is commonly bundled), so Hindi typically renders correctly out of the box — verify on your target test device. If it doesn't, bundle a Devanagari-covering font (e.g. Noto Sans Devanagari) via `react-native.config.js`'s asset linking and reference it in the relevant `Text` style.
 
-Santali strings in this MVP are stored in **romanized Latin script** specifically to avoid this same problem for a fourth script (Ol Chiki) under hackathon time constraints — see `docs/localization-review.md`.
+Santali strings in this MVP are stored in **romanized Latin script** specifically to avoid needing a fourth script (Ol Chiki) under hackathon time constraints — see `docs/localization-review.md`.
+
+### AR device requirements
+
+`isARSupportedOnDevice()` (called in `ArExperienceScreen.tsx`) checks ARCore support at runtime and shows a graceful fallback message if unsupported — most AVD (emulator) images do **not** support ARCore; test the AR flow on a real ARCore-certified Android 10+ device.
 
 ## 4. Environment variables summary
 
@@ -62,3 +96,4 @@ Santali strings in this MVP are stored in **romanized Latin script** specificall
 | `backend/.env` | `JWT_SECRET` | Token signing secret — change for any real deployment |
 | `backend/.env` | `VERIFY_BASE_URL` | Must match wherever the admin dashboard's `/verify` page is hosted |
 | `admin-dashboard/.env` | `VITE_API_BASE_URL` | Backend URL the dashboard calls |
+| `mobile-app/src/api/client.ts` | `DEFAULT_BASE_URL` | Backend URL the mobile app calls (no `.env` — RN needs extra tooling for that; a constant is simpler for this MVP) |

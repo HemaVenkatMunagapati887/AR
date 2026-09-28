@@ -1,6 +1,6 @@
 # Backend API Reference
 
-Base URL: `http://localhost:5000/api` (dev) — set `VITE_API_BASE_URL` / the Unity `ApiClient.baseUrl` for other environments.
+Base URL: `http://localhost:5000/api` (dev) — set `VITE_API_BASE_URL` (dashboard) / `DEFAULT_BASE_URL` in `mobile-app/src/api/client.ts` for other environments.
 
 All authenticated routes require `Authorization: Bearer <token>` from `/auth/login`.
 

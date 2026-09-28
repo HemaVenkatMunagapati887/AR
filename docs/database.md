@@ -36,7 +36,7 @@
 ## `attempts`
 | Field | Type | Notes |
 |---|---|---|
-| clientAttemptId | String, indexed | Set by the Unity client; used for idempotent sync |
+| clientAttemptId | String, indexed | Set by the mobile client; used for idempotent sync |
 | userId | ObjectId → users | |
 | moduleId | String | |
 | answers | `{ questionId, selected, correct }[]` | Graded server-side, never trusts client-computed `correct` |
